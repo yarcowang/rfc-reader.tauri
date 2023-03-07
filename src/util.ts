@@ -1,11 +1,19 @@
-interface RfcData {
+export const DEFAULT_CONTENT = "Welcome to RFC Reader!\n" +
+    ""
+
+export type Hits = {
+    no: string,
+    hits: number
+}
+
+type Util = {
     title: string,
     no: string
 }
 
-interface CommRfcData {
+type CommRfcData = {
     title: string,
-    rfcs: RfcData[]
+    rfcs: Util[]
 }
 
 export const rfcs: CommRfcData[] = [{

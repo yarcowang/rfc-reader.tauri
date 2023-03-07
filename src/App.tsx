@@ -1,23 +1,12 @@
 import {useState, useEffect, Fragment} from 'react'
 import {invoke} from '@tauri-apps/api/tauri'
-import { rfcs } from "./rfcdata";
-import {appWindow} from "@tauri-apps/api/window";
+import {DEFAULT_CONTENT, Hits, rfcs} from "./util";
 // import reactLogo from './assets/react.svg'
-
-const DEFAULT_CONTENT = "Welcome to RFC Reader!\n" +
-    ""
-
-type Hits = {
-    no: string,
-    hits: number
-}
-
-
 
 function App() {
     const [rfcno, setRfcno] = useState<string>('')
     const [content, setContent] = useState<string>(DEFAULT_CONTENT)
-    let [hits, setHits] = useState<Hits[]>([])
+    const [hits, setHits] = useState<Hits[]>([])
 
     function onLoadRfc(rfcno: string) {
         rfcno = parseInt(rfcno).toString()
@@ -40,16 +29,21 @@ function App() {
         if (idx === -1) {
             setHits([...hits, ({no: rfcno, hits: 1})])
         } else {
-            hits[idx].hits++
-            setHits(hits)
+            setHits(prev => {
+                return prev.map((hits, i) => {
+                    if (i === idx) {
+                        return {...hits, hits: hits.hits + 1}
+                    }
+                    return hits
+                })
+            })
         }
     }
 
     const hitsTpl = hits.sort((l, r) => r.hits - l.hits).slice(0, 10).map(hits =>
-        <li key={hits.no} className="underline text-sm cursor-pointer" onClick={() => {
-            setRfcno(hits.no);
-            onLoadRfc(hits.no)
-        }}>RFC {hits.no} ( hits:{hits.hits} )</li>
+        <li key={hits.no} className="underline text-sm cursor-pointer" onClick={() => {setRfcno(hits.no);onLoadRfc(hits.no)}}>
+            RFC {hits.no} / hits: {hits.hits}
+        </li>
     )
 
     const rfcsTpl = rfcs.map(layer => {
@@ -73,12 +67,8 @@ function App() {
         // })
     }, [hits])
 
-    // appWindow.listen('close-requested', () => {
-    //     appWindow.emit('store-hits', {hits})
-    // })
-
     return (
-        <div className="flex flex-row scrollbar-hide">
+        <div className="flex flex-row">
             <div className="basis-1/4 bg-gray-300">
                 <div className="sticky top-0 p-3 flex flex-col ">
                     <div className="">
@@ -99,7 +89,7 @@ function App() {
                     </div>
 
                     <div className="pt-3">
-                        <h5 className="font-bold">Your Hits / Top 10</h5>
+                        <h5 className="font-bold">Your Recent Hits / Top 10</h5>
                         <ul className="list-inside list-disc">
                             {hitsTpl}
                         </ul>
@@ -113,7 +103,7 @@ function App() {
                 </div>
             </div>
 
-            <div className="p-5 basis-3/4 max-h-full text-sm overflow-auto">
+            <div className="p-5 basis-3/4 max-h-full text-sm">
                 <pre className="w-10/12 mx-auto">
                     {content}
                 </pre>

@@ -29,7 +29,7 @@
         "icons/icon.icns",
         "icons/icon.ico"
       ],
-      "identifier": "com.tauri.dev",
+      "identifier": "net.bbish.apps.rfc-reader",
       "longDescription": "",
       "macOS": {
         "entitlements": null,
